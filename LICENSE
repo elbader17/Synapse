@@ -1,0 +1,104 @@
+# License Agreement
+
+## Proprietary License - All Rights Reserved
+
+Copyright (c) 2026 Medical Records Manager
+
+### IMPORTANT NOTICE
+
+**THIS SOFTWARE IS PROPRIETARY AND CONFIDENTIAL.**
+
+By accessing, copying, or using this software, you agree to be bound by the terms of this license. If you do not agree to these terms, you must immediately stop using this software and delete all copies in your possession.
+
+---
+
+## 1. LICENSE GRANT
+
+This software and all associated documentation, including but not limited to:
+- Source code
+- Configuration files
+- Database schemas
+- API documentation
+- Build artifacts
+
+(collectively, the "Software") is provided under a **restricted license** that requires explicit written permission from the owner.
+
+### Permitted Use
+
+You may ONLY use this Software if:
+
+1. **Written Agreement**: You have a signed written agreement with the owner permitting use
+2. **Authorized Access**: You are specifically authorized in writing by the owner
+3. **Evaluation**: You have received temporary evaluation rights in writing from the owner
+
+### Prohibited Use
+
+You are expressly prohibited from:
+
+- ❌ Using the Software in production without written authorization
+- ❌ Modifying, adapting, or creating derivative works
+- ❌ Redistributing, sublicensing, or transferring the Software
+- ❌ Reverse engineering, decompiling, or disassembling
+- ❌ Removing or altering proprietary notices
+- ❌ Using the Software for any illegal purpose
+
+---
+
+## 2. INTELLECTUAL PROPERTY
+
+The Software is protected by:
+- Copyright laws (Spain, USA, EU, and international treaties)
+- Trade secret laws
+- Patent laws (where applicable)
+- Database laws (Spain, EU)
+
+All title, ownership, and intellectual property rights in and to the Software remain exclusively with the owner.
+
+---
+
+## 3. CONFIDENTIALITY
+
+You agree to:
+- Keep the Software strictly confidential
+- Not disclose any part of the Software to third parties
+- Take all reasonable measures to protect confidentiality
+- Not use the Software except as specifically authorized
+
+---
+
+## 4. DISCLAIMER OF WARRANTIES
+
+THE SOFTWARE IS PROVIDED "AS IS" WITHOUT WARRANTY OF ANY KIND. THE OWNER DISCLAIMS ALL WARRANTIES, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT.
+
+---
+
+## 5. LIMITATION OF LIABILITY
+
+IN NO EVENT SHALL THE OWNER BE LIABLE FOR ANY CLAIM, DAMAGES, OR EXPENSES ARISING FROM THE USE OR INABILITY TO USE THE SOFTWARE, REGARDLESS OF WHETHER SUCH CLAIM IS BASED ON CONTRACT, TORT, OR OTHERWISE.
+
+---
+
+## 6. TERMINATION
+
+This license is effective until terminated. The owner may terminate this license immediately if you breach any term. Upon termination, you must:
+- Stop using the Software immediately
+- Delete all copies of the Software
+- Return or destroy all materials containing the Software
+
+---
+
+## 7. GOVERNING LAW
+
+This license shall be governed by the laws of Spain. Any disputes shall be resolved in the courts of Madrid, Spain.
+
+---
+
+## 8. CONTACT
+
+For licensing inquiries, please contact the owner directly.
+
+**UNAUTHORIZED USE IS A LEGAL VIOLATION AND MAY RESULT IN CIVIL AND/OR CRIMINAL PROSECUTION.**
+
+---
+
+*This is a proprietary license. Do not use this software without written authorization.*
