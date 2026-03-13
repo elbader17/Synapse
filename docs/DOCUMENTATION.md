@@ -1,6 +1,41 @@
-# Medical Records Manager - Backend
+# Medical Records Manager - Backend API
 
 ## Comprehensive Technical Documentation
+
+---
+
+## What is This API?
+
+The **Medical Records Manager** is a **secure REST API backend** for managing electronic medical records (EMR/EHR) in healthcare organizations.
+
+### 🎯 What It Does
+
+| Functionality | Description |
+|---------------|-------------|
+| **Patient Data Management** | Secure storage and retrieval of patient PII (Personally Identifiable Information) |
+| **Medical Records** | Create, read, update, and manage clinical records (consultations, diagnoses, prescriptions, lab results) |
+| **User Authentication** | Secure login with Two-Factor Authentication (2FA) |
+| **Access Control** | Role-based permissions (Doctor, Nurse, Admin, Receptionist, Patient) |
+| **Audit Trail** | Complete logging of who did what, when, and from where |
+| **Data Encryption** | All sensitive data encrypted at rest using AES-256-GCM |
+
+### 🛡️ Compliance
+
+This API is designed to comply with major healthcare data privacy regulations:
+
+| Regulation | Region | Requirements Met |
+|------------|--------|------------------|
+| **HIPAA** | USA | Access control, audit controls, transmission security, encryption |
+| **GDPR** | Europe | Data minimization, right to access/erasure, consent management |
+| **LGPD** | Brazil | Data subject rights, consent, privacy by design |
+
+### 🏥 Use Cases
+
+- Hospital information systems (HIS)
+- Electronic Health Record (EHR) systems
+- Clinic management software
+- Telemedicine platforms
+- Healthcare provider portals
 
 ---
 
@@ -10,13 +45,14 @@
 2. [Architecture](#architecture)
 3. [Security Implementation](#security-implementation)
 4. [Authentication System](#authentication-system)
-5. [API Endpoints](#api-endpoints)
-6. [Database Schema](#database-schema)
-7. [Configuration](#configuration)
-8. [Deployment](#deployment)
-9. [Testing](#testing)
-10. [Compliance](#compliance)
-11. [Troubleshooting](#troubleshooting)
+5. [TOTP Two-Factor Authentication](#totp-two-factor-authentication)
+6. [API Endpoints](#api-endpoints)
+7. [Database Schema](#database-schema)
+8. [Configuration](#configuration)
+9. [Deployment](#deployment)
+10. [Testing](#testing)
+11. [Compliance](#compliance)
+12. [Troubleshooting](#troubleshooting)
 
 ---
 
@@ -259,6 +295,158 @@ The system supports three 2FA methods:
 - **Threshold**: 5 failed login attempts within 1 hour
 - **Duration**: 15 minutes lockout
 - **Tracking**: Stored in database for audit purposes
+
+---
+
+## TOTP Two-Factor Authentication
+
+### What is TOTP?
+
+**TOTP (Time-based One-Time Password)** is an algorithm that generates a temporary password that is valid for a short period (typically 30 seconds). It's the industry standard for 2FA, used by Google, Amazon, banks, and healthcare systems worldwide.
+
+### How It Works
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    HOW TOTP WORKS                               │
+└─────────────────────────────────────────────────────────────────┘
+
+   ┌─────────────┐      ┌─────────────┐      ┌─────────────┐
+   │   SERVER    │      │  AUTH APP  │      │   CLIENT   │
+   │  ( SECRET ) │      │             │      │             │
+   └──────┬──────┘      └──────┬──────┘      └──────┬──────┘
+          │                    │                    │
+          │ 1. User enables    │                    │
+          │    2FA            │                    │
+          │───────────────────►│                    │
+          │                   │                    │
+          │ 2. Generate       │                    │
+          │    Secret Key     │                    │
+          │    (Base32)       │                    │
+          │<──────────────────│                    │
+          │                   │                    │
+          │                   │ 3. Scan QR or      │
+          │                   │    enter key       │
+          │                   │────────────────────┼────►
+          │                   │                    │
+          │                   │ 4. App computes    │
+          │                   │    HOTP(T, secret) │
+          │                   │    = 6-digit code │
+          │                   │    (changes every │
+          │                   │    30 seconds)    │
+          │                   │                    │
+          │ 5. User enters    │                    │
+          │    code           │                    │
+          │◄──────────────────│────────────────────│
+          │                   │                    │
+          │ 6. Verify:        │                    │
+          │    NOW = T        │                    │
+          │    code == H(T)   │                    │
+          │                   │                    │
+          ▼                   ▼                    ▼
+```
+
+### TOTP Algorithm Details
+
+```
+Formula: TOTP = HOTP(Secret, T)
+
+Where:
+  - T = floor(Unix_Time / 30)  ← Current 30-second window
+  - Secret = Base32 encoded secret key
+  - HOTP = HMAC-SHA1(Secret, T) → Truncate to 6 digits
+```
+
+### Implementation in This API
+
+| Feature | Implementation |
+|---------|----------------|
+| **Algorithm** | RFC 6238 (TOTP) + RFC 4226 (HOTP) |
+| **Time Window** | 30 seconds |
+| **Tolerance** | ±1 window (90 seconds total grace period) |
+| **Digits** | 6 (standard) |
+| **HMAC** | SHA-1 (as per RFC) |
+| **Secret Length** | 160 bits (20 bytes, 32 Base32 chars) |
+| **Compatibility** | Google Authenticator, Authy, Microsoft Authenticator, 1Password, etc. |
+
+### Setting Up TOTP
+
+1. **User requests 2FA setup**:
+   ```bash
+   POST /api/v1/auth/2fa/setup
+   Authorization: Bearer <token>
+   {
+     "password": "current_password",
+     "method": "totp"
+   }
+   ```
+
+2. **Server returns**:
+   ```json
+   {
+     "secret": "JBSWY3DPEHPK3PXP",
+     "secret_base32": "JBSWY3DPEHPK3PXP",
+     "qr_code_url": "otpauth://totp/MedicalRecords:doctor@hospital.com?secret=JBSWY3DPEHPK3PXP",
+     "backup_codes": ["A1B2-C3D4", "E5F6-G7H8", ...]
+   }
+   ```
+
+3. **User scans QR code** with authenticator app
+
+4. **User verifies** with first code:
+   ```bash
+   POST /api/v1/auth/2fa/verify
+   X-2FA-Secret: <secret_from_step_2>
+   {
+     "code": "123456"
+   }
+   ```
+
+### Verifying TOTP Code
+
+```bash
+POST /api/v1/auth/verify-2fa
+{
+  "temp_token": "eyJ...",
+  "code": "123456"
+}
+```
+
+The server accepts codes from:
+- Current 30-second window
+- Previous 30-second window (for clock drift)
+- Next 30-second window (grace period)
+
+### Backup Codes
+
+When enabling 2FA, the user receives **10 backup codes**:
+
+```
+A1B2-C3D4, E5F6-G7H8, I9J0-K1L2, M3N4-O5P6
+Q7R8-S9T0, U1V2-W3X4, Y5Z6-A7B8, C9D0-E1F2
+G3H4-I5J6, K7L8-M9N0
+```
+
+- Each code can only be used **once**
+- Used when user loses access to authenticator app
+- After all codes used, user must regenerate new codes
+
+### Security Considerations
+
+| Threat | Protection |
+|--------|------------|
+| **Replay Attack** | TOTP changes every 30 seconds |
+| **Clock Manipulation** | Server accepts ±1 window tolerance |
+| **Secret Disclosure** | Secret stored encrypted in database |
+| **Phishing** | TOTP is tied to specific account (issuer in QR) |
+| **Man-in-Middle** | Use HTTPS in production |
+
+### Testing TOTP
+
+To test TOTP manually, you can use:
+- **Online TOTP generator**: https://totp.danyal.it/
+- **CLI**: `oathtool --totp -s $(date +%s) <secret>`
+- **Google Authenticator**: Scan the QR code from `/2fa/setup`
 
 ---
 
