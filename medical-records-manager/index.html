@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="es" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Synapse | Backend API Showcase</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    
+    <script>
+        // Configuración inicial del tema para evitar parpadeos
+        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark')
+        } else {
+            document.documentElement.classList.remove('dark')
+        }
+
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            900: '#0c4a6e',
+                            950: '#082f49',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        .gradient-text {
+            background: linear-gradient(135deg, #0ea5e9 0%, #3b82f6 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .code-block {
+            scrollbar-width: thin;
+            scrollbar-color: #334155 #0f172a;
+        }
+    </style>
+</head>
+<body class="font-sans text-slate-800 dark:text-slate-100 bg-slate-50 dark:bg-slate-900 antialiased transition-colors duration-300">
+
+    <!-- Navbar -->
+    <nav class="fixed w-full z-50 bg-white/80 dark:bg-slate-900/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-800 transition-colors">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-2">
+                    <i data-lucide="activity" class="text-brand-600 dark:text-brand-500 h-6 w-6"></i>
+                    <span class="font-bold text-xl tracking-tight text-slate-900 dark:text-white">Synapse<span class="text-brand-500">API</span></span>
+                </div>
+                
+                <!-- Desktop Menu -->
+                <div class="hidden md:flex space-x-8">
+                    <a href="#features" class="text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-brand-600 dark:hover:text-brand-400 transition">Características</a>
+                    <a href="#security" class="text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-brand-600 dark:hover:text-brand-400 transition">Seguridad</a>
+                    <a href="#architecture" class="text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-brand-600 dark:hover:text-brand-400 transition">Arquitectura</a>
+                    <a href="#endpoints" class="text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-brand-600 dark:hover:text-brand-400 transition">Endpoints</a>
+                </div>
+
+                <div class="flex items-center space-x-4">
+                    <!-- Theme Toggle -->
+                    <button id="themeToggleBtn" class="p-2 text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors" title="Cambiar tema">
+                        <i data-lucide="sun" class="h-5 w-5 hidden dark:block"></i>
+                        <i data-lucide="moon" class="h-5 w-5 block dark:hidden"></i>
+                    </button>
+                    
+                    <a href="#" class="hidden md:flex items-center text-sm font-medium text-slate-600 dark:text-slate-300 hover:text-slate-900 dark:hover:text-white transition">
+                        <i data-lucide="github" class="h-5 w-5 mr-2"></i> Repositorio
+                    </a>
+                    <a href="#endpoints" class="hidden md:inline-flex bg-brand-600 hover:bg-brand-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition shadow-sm">
+                        Documentación
+                    </a>
+
+                    <!-- Mobile Menu Button -->
+                    <button id="mobileMenuBtn" class="md:hidden p-2 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors">
+                        <i data-lucide="menu" class="h-6 w-6"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div id="mobileMenu" class="hidden md:hidden bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800">
+            <div class="px-4 pt-2 pb-4 space-y-1">
+                <a href="#features" class="block px-3 py-2 rounded-md text-base font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800">Características</a>
+                <a href="#security" class="block px-3 py-2 rounded-md text-base font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800">Seguridad</a>
+                <a href="#architecture" class="block px-3 py-2 rounded-md text-base font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800">Arquitectura</a>
+                <a href="#endpoints" class="block px-3 py-2 rounded-md text-base font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-800">API Endpoints</a>
+                <div class="border-t border-slate-200 dark:border-slate-700 mt-4 pt-4 flex flex-col space-y-2">
+                    <a href="#" class="flex items-center px-3 py-2 text-base font-medium text-slate-700 dark:text-slate-200">
+                        <i data-lucide="github" class="h-5 w-5 mr-3"></i> Repositorio
+                    </a>
+                    <a href="#endpoints" class="flex items-center justify-center bg-brand-600 hover:bg-brand-700 text-white px-4 py-2 rounded-lg text-base font-medium transition shadow-sm w-full">
+                        Ver Documentación
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="pt-24 pb-16 sm:pt-32 sm:pb-20 lg:pt-40 lg:pb-28 overflow-hidden">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative">
+            <div class="grid lg:grid-cols-2 gap-8 lg:gap-12 items-start lg:items-center">
+                
+                <!-- Hero Text -->
+                <div class="max-w-2xl">
+                    <div class="inline-flex items-center space-x-2 bg-brand-50 dark:bg-brand-900/30 border border-brand-100 dark:border-brand-800 text-brand-600 dark:text-brand-400 px-3 py-1 rounded-full text-xs font-semibold uppercase tracking-wide mb-6">
+                        <span class="relative flex h-2 w-2">
+                          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-brand-400 opacity-75"></span>
+                          <span class="relative inline-flex rounded-full h-2 w-2 bg-brand-500"></span>
+                        </span>
+                        <span>Versión 1.0.0 Estable</span>
+                    </div>
+                    <h1 class="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-extrabold tracking-tight text-slate-900 dark:text-white leading-tight mb-4 sm:mb-6">
+                        Backend seguro y escalable para <span class="gradient-text">Historias Clínicas</span>
+                    </h1>
+                    <p class="text-base sm:text-lg md:text-xl text-slate-600 dark:text-slate-400 mb-8 leading-relaxed">
+                        Una API REST robusta construida en Go, diseñada para gestionar registros médicos electrónicos (EMR/EHR) cumpliendo con las estrictas normativas HIPAA, GDPR y LGPD.
+                    </p>
+                    
+                    <div class="flex flex-wrap gap-4 mb-10">
+                        <div class="flex items-center space-x-2 text-sm font-medium text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800 px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm transition-colors">
+                            <i data-lucide="lock" class="h-4 w-4 text-emerald-500"></i>
+                            <span>AES-256-GCM</span>
+                        </div>
+                        <div class="flex items-center space-x-2 text-sm font-medium text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800 px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm transition-colors">
+                            <i data-lucide="shield-check" class="h-4 w-4 text-blue-500"></i>
+                            <span>TOTP 2FA</span>
+                        </div>
+                        <div class="flex items-center space-x-2 text-sm font-medium text-slate-700 dark:text-slate-300 bg-white dark:bg-slate-800 px-4 py-2 rounded-lg border border-slate-200 dark:border-slate-700 shadow-sm transition-colors">
+                            <i data-lucide="database" class="h-4 w-4 text-indigo-500 dark:text-indigo-400"></i>
+                            <span>PostgreSQL</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Terminal Mockup -->
+                <div class="mt-8 lg:mt-0 relative mx-auto w-full max-w-lg lg:max-w-none transform lg:-rotate-1 hover:rotate-0 transition-transform duration-500">
+                    <div class="absolute -inset-1 bg-gradient-to-r from-brand-500 to-indigo-500 rounded-xl blur opacity-30 dark:opacity-50"></div>
+                    <div class="relative bg-slate-900 rounded-xl shadow-2xl border border-slate-800 overflow-hidden">
+                        <div class="flex items-center justify-between px-4 py-3 bg-slate-950/50 border-b border-slate-800">
+                            <div class="flex space-x-2">
+                                <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                                <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                                <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                            </div>
+                            <div class="text-xs text-slate-400 font-mono">POST /api/v1/auth/login</div>
+                            <button onclick="copyCode()" class="text-slate-400 hover:text-white transition" title="Copiar código">
+                                <i data-lucide="copy" class="h-4 w-4"></i>
+                            </button>
+                        </div>
+                        <div class="p-4 overflow-x-auto code-block font-mono text-sm">
+<pre id="codeSnippet"><span class="text-pink-400">curl</span> -X POST http://api.synapse.com/v1/auth/login \
+  -H <span class="text-green-400">"Content-Type: application/json"</span> \
+  -d <span class="text-yellow-300">'{
+    "email": "doctor@hospital.com",
+    "password": "SecurePass123!"
+  }'</span>
+
+<span class="text-slate-500"># Respuesta HTTP 200 OK (2FA Requerido)</span>
+{
+  <span class="text-blue-300">"require_two_factor"</span>: <span class="text-purple-400">true</span>,
+  <span class="text-blue-300">"two_factor_method"</span>: <span class="text-green-400">"totp"</span>,
+  <span class="text-blue-300">"temp_token"</span>: <span class="text-green-400">"eyJhbGciOiJIUzI1NiIs..."</span>,
+  <span class="text-blue-300">"expires_in"</span>: <span class="text-purple-400">300</span>
+}</pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Tech Stack Logos -->
+    <div class="border-y border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900/50 py-8 transition-colors">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <p class="text-center text-sm font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-6">Construido con tecnología moderna</p>
+            <div class="flex flex-wrap justify-center items-center gap-8 md:gap-16 opacity-60 dark:opacity-80 grayscale hover:grayscale-0 transition-all duration-500">
+                <!-- Go Logo -->
+                <div class="text-2xl font-bold font-mono text-cyan-600 dark:text-cyan-400 flex items-center">
+                    <i data-lucide="file-code" class="mr-2 h-8 w-8"></i> Golang
+                </div>
+                <!-- Gin -->
+                <div class="text-xl font-bold text-slate-800 dark:text-slate-200 flex items-center">
+                    Gin Framework
+                </div>
+                <!-- PostgreSQL -->
+                <div class="text-xl font-bold text-indigo-600 dark:text-indigo-400 flex items-center">
+                    <i data-lucide="database" class="mr-2 h-7 w-7"></i> PostgreSQL
+                </div>
+                <!-- Docker -->
+                <div class="text-xl font-bold text-blue-500 dark:text-blue-400 flex items-center">
+                    <i data-lucide="container" class="mr-2 h-8 w-8"></i> Docker
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Features Section -->
+    <section id="features" class="py-20 bg-slate-50 dark:bg-slate-900 transition-colors">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <h2 class="text-3xl font-bold text-slate-900 dark:text-white mb-4">Características Principales</h2>
+                <p class="text-slate-600 dark:text-slate-400">Diseñado desde cero para resolver los desafíos más críticos en el manejo de información de salud electrónica (EHR).</p>
+            </div>
+
+            <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <!-- Feature 1 -->
+                <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition">
+                    <div class="w-12 h-12 bg-blue-100 dark:bg-blue-900/40 rounded-xl flex items-center justify-center mb-4 text-blue-600 dark:text-blue-400">
+                        <i data-lucide="shield-alert" class="h-6 w-6"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-slate-900 dark:text-white mb-2">Control de Acceso (RBAC)</h3>
+                    <p class="text-slate-600 dark:text-slate-400 text-sm">Sistema granular de roles (Médico, Enfermera, Admin, Paciente) que restringe el acceso a endpoints y datos específicos según permisos.</p>
+                </div>
+                <!-- Feature 2 -->
+                <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition">
+                    <div class="w-12 h-12 bg-emerald-100 dark:bg-emerald-900/40 rounded-xl flex items-center justify-center mb-4 text-emerald-600 dark:text-emerald-400">
+                        <i data-lucide="history" class="h-6 w-6"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-slate-900 dark:text-white mb-2">Auditoría Inmutable</h3>
+                    <p class="text-slate-600 dark:text-slate-400 text-sm">Registro completo de quién hizo qué, cuándo y desde dónde. Los registros de auditoría no pueden ser alterados ni eliminados.</p>
+                </div>
+                <!-- Feature 3 -->
+                <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition">
+                    <div class="w-12 h-12 bg-purple-100 dark:bg-purple-900/40 rounded-xl flex items-center justify-center mb-4 text-purple-600 dark:text-purple-400">
+                        <i data-lucide="key-round" class="h-6 w-6"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-slate-900 dark:text-white mb-2">Autenticación TOTP 2FA</h3>
+                    <p class="text-slate-600 dark:text-slate-400 text-sm">Implementación estándar RFC 6238. Soporte para Google Authenticator, Authy y códigos de respaldo de un solo uso.</p>
+                </div>
+                <!-- Feature 4 -->
+                <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition">
+                    <div class="w-12 h-12 bg-brand-100 dark:bg-brand-900/40 rounded-xl flex items-center justify-center mb-4 text-brand-600 dark:text-brand-400">
+                        <i data-lucide="users" class="h-6 w-6"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-slate-900 dark:text-white mb-2">Gestión de Pacientes PII</h3>
+                    <p class="text-slate-600 dark:text-slate-400 text-sm">Separación estricta de Información de Identificación Personal (PII) de los datos clínicos utilizando identificadores seudónimos.</p>
+                </div>
+                <!-- Feature 5 -->
+                <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition">
+                    <div class="w-12 h-12 bg-red-100 dark:bg-red-900/40 rounded-xl flex items-center justify-center mb-4 text-red-600 dark:text-red-400">
+                        <i data-lucide="trash-2" class="h-6 w-6"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-slate-900 dark:text-white mb-2">Soft Deletes & Retención</h3>
+                    <p class="text-slate-600 dark:text-slate-400 text-sm">Eliminación lógica de registros para cumplir con políticas de retención de datos médicas, garantizando el derecho al olvido del GDPR.</p>
+                </div>
+                <!-- Feature 6 -->
+                <div class="bg-white dark:bg-slate-800 p-6 rounded-2xl border border-slate-200 dark:border-slate-700 shadow-sm hover:shadow-md transition">
+                    <div class="w-12 h-12 bg-yellow-100 dark:bg-yellow-900/40 rounded-xl flex items-center justify-center mb-4 text-yellow-600 dark:text-yellow-400">
+                        <i data-lucide="activity-square" class="h-6 w-6"></i>
+                    </div>
+                    <h3 class="text-xl font-semibold text-slate-900 dark:text-white mb-2">Rate Limiting</h3>
+                    <p class="text-slate-600 dark:text-slate-400 text-sm">Protección contra ataques de fuerza bruta y abusos de API mediante un algoritmo de ventana deslizante en memoria.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Security & Compliance Section -->
+    <section id="security" class="py-20 bg-slate-900 dark:bg-slate-950 text-white transition-colors">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid lg:grid-cols-2 gap-16 items-center">
+                <div>
+                    <h2 class="text-3xl font-bold mb-6">Seguridad de Grado Militar y Cumplimiento Normativo</h2>
+                    <p class="text-slate-300 dark:text-slate-400 mb-8">
+                        La privacidad del paciente no es opcional. El sistema encripta toda la información sensible en reposo (At Rest) y en tránsito, garantizando la aprobación de auditorías de salud.
+                    </p>
+                    
+                    <ul class="space-y-4">
+                        <li class="flex items-start">
+                            <i data-lucide="check-circle-2" class="h-6 w-6 text-emerald-400 mr-3 flex-shrink-0"></i>
+                            <div>
+                                <strong class="block text-white">HIPAA Compliant (EE. UU.)</strong>
+                                <span class="text-sm text-slate-400">Control de acceso, registros de auditoría inmutables, seguridad de transmisión y políticas de contraseñas estrictas.</span>
+                            </div>
+                        </li>
+                        <li class="flex items-start">
+                            <i data-lucide="check-circle-2" class="h-6 w-6 text-emerald-400 mr-3 flex-shrink-0"></i>
+                            <div>
+                                <strong class="block text-white">GDPR / LGPD (Europa/Brasil)</strong>
+                                <span class="text-sm text-slate-400">Minimización de datos (PII encriptado por separado), derecho al acceso y borrado lógico con retención de logs.</span>
+                            </div>
+                        </li>
+                        <li class="flex items-start">
+                            <i data-lucide="check-circle-2" class="h-6 w-6 text-emerald-400 mr-3 flex-shrink-0"></i>
+                            <div>
+                                <strong class="block text-white">Encriptación AES-256-GCM</strong>
+                                <span class="text-sm text-slate-400">Campos como Nombre, SSN, Dirección e Historias Clínicas se cifran a nivel de aplicación antes de tocar la base de datos.</span>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+
+                <!-- Graphic/Visual for Encryption -->
+                <div class="bg-slate-800 p-6 md:p-8 rounded-2xl border border-slate-700 relative overflow-hidden">
+                    <div class="absolute top-0 right-0 p-4 opacity-10">
+                        <i data-lucide="lock" class="h-48 w-48"></i>
+                    </div>
+                    <h4 class="text-lg font-mono text-brand-400 mb-4 border-b border-slate-700 pb-2">Base de Datos: Tabla patients</h4>
+                    <div class="space-y-3 font-mono text-xs md:text-sm">
+                        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center bg-slate-900 p-3 rounded gap-2">
+                            <span class="text-slate-400">pseudonym_id</span>
+                            <span class="text-green-400">"P-84729"</span>
+                        </div>
+                        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center bg-slate-900 p-3 rounded gap-2">
+                            <span class="text-slate-400">encrypted_full_name</span>
+                            <span class="text-yellow-500 flex items-center truncate max-w-full sm:max-w-xs">
+                                <i data-lucide="lock" class="h-3 w-3 mr-1 flex-shrink-0"></i> a3f8...9b2c
+                            </span>
+                        </div>
+                        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center bg-slate-900 p-3 rounded gap-2">
+                            <span class="text-slate-400">encrypted_ssn</span>
+                            <span class="text-yellow-500 flex items-center truncate max-w-full sm:max-w-xs">
+                                <i data-lucide="lock" class="h-3 w-3 mr-1 flex-shrink-0"></i> f71c...0d4a
+                            </span>
+                        </div>
+                        <div class="flex flex-col sm:flex-row sm:justify-between sm:items-center bg-slate-900 p-3 rounded gap-2">
+                            <span class="text-slate-400">blood_type</span>
+                            <span class="text-green-400">"O+"</span>
+                        </div>
+                    </div>
+                    <p class="text-xs text-slate-400 mt-4 italic">El acceso directo a la base de datos no expone la identidad del paciente.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Architecture Section -->
+    <section id="architecture" class="py-20 bg-white dark:bg-slate-900 transition-colors">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <h2 class="text-3xl font-bold text-slate-900 dark:text-white mb-4">Clean Architecture en Go</h2>
+                <p class="text-slate-600 dark:text-slate-400">Separación clara de responsabilidades para un código mantenible, testeable y escalable.</p>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-center">
+                <div class="p-6 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 transition-colors">
+                    <div class="bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400 w-10 h-10 rounded-full flex items-center justify-center mx-auto mb-3 font-bold">1</div>
+                    <h4 class="font-bold text-slate-800 dark:text-white mb-2">Transport Layer</h4>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Manejo HTTP con Gin, formato de requests/responses, Middleware de seguridad.</p>
+                </div>
+                <div class="p-6 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 transition-colors">
+                    <div class="bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400 w-10 h-10 rounded-full flex items-center justify-center mx-auto mb-3 font-bold">2</div>
+                    <h4 class="font-bold text-slate-800 dark:text-white mb-2">Application Layer</h4>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Casos de uso, lógica de orquestación, validación de reglas de negocio.</p>
+                </div>
+                <div class="p-6 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 transition-colors">
+                    <div class="bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400 w-10 h-10 rounded-full flex items-center justify-center mx-auto mb-3 font-bold">3</div>
+                    <h4 class="font-bold text-slate-800 dark:text-white mb-2">Domain Layer</h4>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Entidades puras (User, Patient, Record), interfaces de repositorios.</p>
+                </div>
+                <div class="p-6 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 transition-colors">
+                    <div class="bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400 w-10 h-10 rounded-full flex items-center justify-center mx-auto mb-3 font-bold">4</div>
+                    <h4 class="font-bold text-slate-800 dark:text-white mb-2">Infrastructure Layer</h4>
+                    <p class="text-xs text-slate-500 dark:text-slate-400">Conexión a PostgreSQL (pgx), servicio Crypto AES-256, Logging.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Endpoints Quick Reference -->
+    <section id="endpoints" class="py-20 bg-slate-50 dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 transition-colors">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+            <h2 class="text-2xl font-bold text-slate-900 dark:text-white mb-8 text-center">Referencia Rápida de API</h2>
+            
+            <div class="bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl shadow-sm overflow-hidden overflow-x-auto transition-colors">
+                <table class="w-full text-left text-sm whitespace-nowrap md:whitespace-normal">
+                    <thead class="bg-slate-50 dark:bg-slate-900/50 text-slate-600 dark:text-slate-300 font-medium border-b border-slate-200 dark:border-slate-700">
+                        <tr>
+                            <th class="px-4 md:px-6 py-4">Método</th>
+                            <th class="px-4 md:px-6 py-4">Endpoint</th>
+                            <th class="px-4 md:px-6 py-4 hidden sm:table-cell">Descripción</th>
+                            <th class="px-4 md:px-6 py-4">Auth</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100 dark:divide-slate-700">
+                        <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
+                            <td class="px-4 md:px-6 py-4"><span class="bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-400 px-2 py-1 rounded text-xs font-bold">POST</span></td>
+                            <td class="px-4 md:px-6 py-4 font-mono text-slate-600 dark:text-slate-300 text-xs md:text-sm">/api/v1/auth/login</td>
+                            <td class="px-4 md:px-6 py-4 hidden sm:table-cell dark:text-slate-400">Inicio de sesión (Retorna Temp Token si 2FA)</td>
+                            <td class="px-4 md:px-6 py-4"><i data-lucide="unlock" class="h-4 w-4 text-slate-400 dark:text-slate-500"></i></td>
+                        </tr>
+                        <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
+                            <td class="px-4 md:px-6 py-4"><span class="bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-400 px-2 py-1 rounded text-xs font-bold">POST</span></td>
+                            <td class="px-4 md:px-6 py-4 font-mono text-slate-600 dark:text-slate-300 text-xs md:text-sm">/api/v1/auth/verify-2fa</td>
+                            <td class="px-4 md:px-6 py-4 hidden sm:table-cell dark:text-slate-400">Verifica código TOTP y retorna JWT</td>
+                            <td class="px-4 md:px-6 py-4"><i data-lucide="unlock" class="h-4 w-4 text-slate-400 dark:text-slate-500"></i></td>
+                        </tr>
+                        <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
+                            <td class="px-4 md:px-6 py-4"><span class="bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-400 px-2 py-1 rounded text-xs font-bold">POST</span></td>
+                            <td class="px-4 md:px-6 py-4 font-mono text-slate-600 dark:text-slate-300 text-xs md:text-sm">/api/v1/medical-records</td>
+                            <td class="px-4 md:px-6 py-4 hidden sm:table-cell dark:text-slate-400">Crea una nueva historia clínica (Encripta datos)</td>
+                            <td class="px-4 md:px-6 py-4"><i data-lucide="lock" class="h-4 w-4 text-brand-600 dark:text-brand-400"></i></td>
+                        </tr>
+                        <tr class="hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors">
+                            <td class="px-4 md:px-6 py-4"><span class="bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-400 px-2 py-1 rounded text-xs font-bold">GET</span></td>
+                            <td class="px-4 md:px-6 py-4 font-mono text-slate-600 dark:text-slate-300 text-xs md:text-sm">/api/v1/medical-records/patient/:id</td>
+                            <td class="px-4 md:px-6 py-4 hidden sm:table-cell dark:text-slate-400">Obtiene registros (Requiere rol Médico/Admin)</td>
+                            <td class="px-4 md:px-6 py-4"><i data-lucide="lock" class="h-4 w-4 text-brand-600 dark:text-brand-400"></i></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Footer -->
+        <footer class="bg-slate-900 dark:bg-slate-950 text-slate-400 py-12 border-t border-slate-800 transition-colors">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col md:flex-row justify-between items-center text-center md:text-left">
+                <div class="flex items-center justify-center md:justify-start space-x-2 mb-4 md:mb-0">
+                    <i data-lucide="activity" class="h-6 w-6 text-brand-500"></i>
+                    <span class="text-white font-semibold">Synapse API Project</span>
+                </div>
+                <p class="text-sm">
+                    Diseñado para demostrar prácticas avanzadas de backend en Go.
+                </p>
+                <div class="mt-4 md:mt-0 flex space-x-4">
+                    <a href="#" class="hover:text-white transition"><i data-lucide="github" class="h-5 w-5"></i></a>
+                    <a href="#" class="hover:text-white transition"><i data-lucide="file-text" class="h-5 w-5"></i></a>
+                </div>
+            </div>
+        </footer>
+
+        <!-- Scripts -->
+        <script>
+            // Inicializar iconos de Lucide
+            lucide.createIcons();
+
+            // Lógica para copiar código
+            function copyCode() {
+                const codeText = document.getElementById('codeSnippet').innerText;
+                navigator.clipboard.writeText(codeText).then(() => {
+                    alert('Código copiado al portapapeles');
+                });
+            }
+
+            // Lógica del menú móvil
+            const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+            const mobileMenu = document.getElementById('mobileMenu');
+
+            mobileMenuBtn.addEventListener('click', () => {
+                mobileMenu.classList.toggle('hidden');
+            });
+
+            // Cerrar menú móvil al hacer click en un enlace
+            mobileMenu.querySelectorAll('a').forEach(link => {
+                link.addEventListener('click', () => {
+                    mobileMenu.classList.add('hidden');
+                });
+            });
+
+            // Lógica de Dark Mode
+            const themeToggleBtn = document.getElementById('themeToggleBtn');
+            const htmlTag = document.documentElement;
+
+            themeToggleBtn.addEventListener('click', () => {
+                htmlTag.classList.toggle('dark');
+                const isDark = htmlTag.classList.contains('dark');
+                
+                // Guardar preferencia
+                localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            });
+        </script>
+    </body>
+</html>
