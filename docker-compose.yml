@@ -1,0 +1,60 @@
+version: '3.8'
+
+services:
+  # Base de datos PostgreSQL para desarrollo
+  postgres:
+    image: postgres:15-alpine
+    container_name: medical_records_db
+    environment:
+      POSTGRES_DB: medical_records
+      POSTGRES_USER: medical_user
+      POSTGRES_PASSWORD: secure_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./internal/infrastructure/database/migrations:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U medical_user -d medical_records"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - medical_network
+
+  # Aplicación Go
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: medical_records_api
+    environment:
+      - ENVIRONMENT=development
+      - SERVER_HOST=0.0.0.0
+      - SERVER_PORT=8080
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=medical_user
+      - DB_PASSWORD=secure_password
+      - DB_NAME=medical_records
+      - DB_SSL_MODE=disable
+      - JWT_SECRET=CHANGE_ME_IN_PRODUCTION_32_CHARACTERS_MIN
+      - ENCRYPTION_KEY=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
+      - RATE_LIMIT=100
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - medical_network
+    volumes:
+      - ./:/app
+    command: sleep infinity
+
+volumes:
+  postgres_data:
+
+networks:
+  medical_network:
+    driver: bridge
